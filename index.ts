@@ -52,7 +52,19 @@ class Currency<
 	}
 }
 
-const myCurrency = new Currency(["USD", "JPY", "THB"]);
+class MyCurrency<
+	const Currencies extends readonly string[],
+	Values extends string = Extract<Currencies[keyof Currencies], string>,
+> extends Currency<Currencies, Values> {
+	constructor(
+		public currencies: Currencies,
+		public api = "https://api.frankfurter.app",
+	) {
+		super(currencies);
+	}
+}
+
+const myCurrency = new MyCurrency(["USD", "JPY", "THB"]);
 
 const a = async () => {
 	await myCurrency.convert("USD", "THB", 1).then(console.log);
