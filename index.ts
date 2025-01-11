@@ -10,8 +10,19 @@ interface CurrencyResult<T extends string> {
 // }
 
 function cache(method: Function, context: unknown) {
-	return function a(from: string, to: string, amount: number) {
-		method(from, to, amount);
+	// @ts-ignore
+	return async function a(this, from: string, to: string, amount: number) {
+		const key = `${from}${to}`;
+		if (this.caches[key]) return this.caches[key] * amount;
+
+		console.log("First time");
+
+		const result = await method.bind(this)(from, to, amount);
+
+		const rate = result.rates[to];
+		this.caches[key] = rate / result.amount;
+
+		return rate;
 	};
 }
 
@@ -23,28 +34,13 @@ class Currency<
 	private caches: Record<string, number> = {};
 	constructor(public currencies: Currencies) {}
 
-	// @cache
-	async convert<To extends Values>(
-		from: Currencies[keyof Currencies],
-		to: To,
-		amount: number,
-	) {
-		const key = `${from}${to}`;
-
-		if (this.caches[key]) {
-			return this.caches[key] * amount;
-		}
-
-		const result = await fetch(
+	@cache
+	async convert<To extends Values>(from: Values, to: To, amount: number) {
+		return await fetch(
 			`${this.api}/latest?from=${from}&to=${to}&amount=${amount}`,
 		)
 			.then((x) => x.json() as unknown as CurrencyResult<To>)
 			.then((a) => a);
-
-		const rate = result.rates[to as To];
-		this.caches[key] = rate / result.amount;
-
-		return rate;
 	}
 
 	get latest() {
