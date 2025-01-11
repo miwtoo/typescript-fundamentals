@@ -17,6 +17,10 @@ class Currency<const Currencies> {
             .then((a) => a)
     }
 
+    get latest() {
+        return fetch(`${this.api}/latest`).then((x) => x.json())
+    }
+
     log() {
         return this.currencies;
     }
@@ -24,6 +28,7 @@ class Currency<const Currencies> {
 
 const myCurrency = new Currency(['USD', 'JPY', 'THB']);
 myCurrency.convert('USD', 'THB', 1).then(console.log)
+myCurrency.latest.then(console.log)
 
 // const a = ['USD', 'JPY', 'THB'] as const
 // type A = typeof a
