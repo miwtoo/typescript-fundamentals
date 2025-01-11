@@ -1,5 +1,3 @@
-const api = 'https://api.frankfurter.app'
-
 interface CurrencyResult {
     amount: number
     base: string
@@ -9,30 +7,20 @@ interface CurrencyResult {
     }
 }
 
-type Currency = 'USD' | 'JPY' | 'THB'
+class Currency {
+    api = 'https://api.frankfurter.app'
+    constructor(public currencies: string[]) {}
 
-const convertCurrent = ({
-    from,
-    to,
-    amount
-}: {
-    amount: number
-    from: Currency
-    to: Currency
-}) => {
-    return fetch(`${api}/latest?from=${from}&to=${to}&amount=${amount}`)
-        .then((x) => x.json() as any as CurrencyResult)
-        .then((a) => a)
+    convert(from: string, to: string, amount: number) {
+         return fetch(`${this.api}/latest?from=${from}&to=${to}&amount=${amount}`)
+                .then((x) => x.json() as any as CurrencyResult)
+                .then((a) => a)
+    }
+
+    log() {
+        return this.currencies;
+    }
 }
 
-const main = async () => {
-    const currency = await convertCurrent({
-        amount: 100,
-        from: 'THB',
-        to: 'USD'
-    })
-
-    console.log(currency)    
-}
-
-main()
+const myCurrency = new Currency(['USD', 'JPY', 'THB']);
+myCurrency.convert("USD", "THB", 1).then(console.log)
